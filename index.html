@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gambia Teacher Directory — Full Demo</title>
+<meta name="description" content="Gambia Teacher Directory: Regions, Districts, Schools, Teachers, Nationwide dashboard & statistics" />
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --muted:#9aa4b2;
+    --gold:#d4af37;
+    --silver:#c0c6cc;
+    --diamond:#bfe9ff;
+    --glass:rgba(255,255,255,0.04);
+    --radius:12px;
+    --maxw:1400px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1000px 360px at 8% 8%, rgba(212,175,55,0.06), transparent),
+      radial-gradient(900px 280px at 92% 88%, rgba(191,233,255,0.03), transparent),
+      var(--bg);
+    color:#e6eef6;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:2rem 1rem;
+  }
+  .layout{max-width:var(--maxw);margin:0 auto;}
+  header{display:flex;align-items:center;gap:1rem;justify-content:space-between;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:1rem;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:.6rem 1rem;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+  .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--gold),#ffd27f 40%,var(--diamond));display:grid;place-items:center;color:#08101a;font-weight:800;font-size:20px}
+  h1{margin:0;font-size:1.25rem;line-height:1;color:var(--gold)}
+  .lead{color:var(--muted);font-size:.95rem}
+  .controls{display:flex;gap:.6rem;margin-top:.75rem;align-items:center;flex-wrap:wrap}
+  .search{flex:1;display:flex;align-items:center;background:var(--glass);padding:.45rem;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+  .search input{background:transparent;border:0;color:inherit;padding:.45rem .6rem;outline:none;font-size:0.95rem}
+  .btn{background:linear-gradient(90deg,var(--gold),#ffd27f);color:#08101a;padding:.5rem .9rem;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+  main{display:grid;grid-template-columns:320px 1fr;gap:1rem;margin-top:1rem}
+  aside{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.03);min-height:68vh;overflow:auto}
+  .region-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem}
+  .region-item{padding:.6rem;border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1px solid transparent}
+  .region-item:hover{background:rgba(255,255,255,0.02)}
+  .region-item.active{background:linear-gradient(90deg,rgba(212,175,55,0.06),rgba(191,233,255,0.02));border-color:rgba(212,175,55,0.08)}
+  .content{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.03);min-height:68vh;overflow:auto}
+  .district{background:rgba(255,255,255,0.01);padding:.8rem;border-radius:12px;margin-bottom:1rem;border:1px solid rgba(255,255,255,0.02)}
+  .district h3{margin:0;color:var(--gold);font-size:1rem}
+  .schools-grid{display:flex;flex-direction:column;gap:.6rem;margin-top:.6rem}
+  .school{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:.6rem;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+  .school h4{margin:0 0 .45rem 0;font-size:0.95rem}
+  .section-row{display:flex;gap:.6rem;flex-wrap:wrap}
+  .section{flex:1;min-width:220px;background:rgba(255,255,255,0.01);padding:.5rem;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+  .teacher{display:flex;gap:.6rem;align-items:center;padding:.45rem;border-radius:10px;margin-bottom:.45rem;background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
+  .avatar-wrap{width:56px;height:56px;border-radius:8px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(180deg,var(--silver),rgba(255,255,255,0.06))}
+  .avatar{display:block;width:48px;height:48px;border-radius:8px;object-fit:cover}
+  .initials{font-weight:700;color:#08101a}
+  .tinfo{flex:1}
+  .tinfo b{display:block}
+  .tmeta{font-size:.85rem;color:var(--muted);margin-top:.25rem}
+  footer{margin-top:1rem;color:var(--muted);font-size:.9rem;text-align:center}
+  select{background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:inherit;padding:.5rem;border-radius:10px}
+  .dashboard{display:grid;grid-template-columns:1fr 320px;gap:1rem;margin-bottom:1rem}
+  .dash-card{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .stat-row{display:flex;gap:.6rem;flex-wrap:wrap}
+  .stat{flex:1;min-width:160px;background:rgba(255,255,255,0.02);padding:.6rem;border-radius:10px;text-align:center}
+  .stat h3{margin:0;color:var(--gold)}
+  .region-summary{display:flex;flex-direction:column;gap:.4rem;margin-top:.6rem}
+  .region-line{display:flex;justify-content:space-between;align-items:center;padding:.4rem;border-radius:8px;background:rgba(255,255,255,0.01)}
+  .tabs{display:flex;gap:.6rem;margin-bottom:.6rem}
+  .tab-btn{flex:1;padding:.5rem;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;cursor:pointer}
+  .tab-btn.active{background:linear-gradient(90deg,var(--gold),#ffd27f);color:#08101a;font-weight:700}
+  .stats-table{width:100%;border-collapse:collapse;margin-top:.6rem}
+  .stats-table th,.stats-table td{padding:.6rem;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
+  .small-muted{color:var(--muted);font-size:.9rem}
+  @media (max-width:980px){main{grid-template-columns:1fr} .dashboard{grid-template-columns:1fr} .controls{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+  <div class="layout">
+    <header>
+      <div class="brand">
+        <div class="logo">GM</div>
+        <div>
+          <h1>Gambia Teacher Directory</h1>
+          <div class="lead">Regions → Districts → Schools → Teachers — (by Lamin Ceesay)</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <button class="btn" id="viewStatsTop">View Statistics</button>
+        <button class="btn">Admin</button>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" style="opacity:.85;margin-right:.4rem"><path d="M21 21l-4.35-4.35" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.5" cy="11.5" r="5.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><input id="searchInput" placeholder="Search teachers, schools, districts, regions" /></div>
+      <select id="regionFilter"><option value="">All Regions</option></select>
+      <select id="districtFilter"><option value="">All Districts</option></select>
+      <select id="schoolFilter"><option value="">All Schools</option></select>
+      <button class="btn" id="clearBtn">Clear</button>
+    </div>
+
+    <main>
+      <aside>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+          <h4 style="color:var(--gold);margin:0">Regions</h4>
+          <div class="small-muted">Toggle</div>
+        </div>
+        <div class="tabs" style="margin-bottom:.6rem">
+          <button class="tab-btn active" id="tabRegions">Regions</button>
+          <button class="tab-btn" id="tabStats">Statistics</button>
+        </div>
+        <ul class="region-list" id="regionList"></ul>
+      </aside>
+
+      <section class="content" id="contentArea">
+        <!-- Dashboard (top) + Region list injected here -->
+      </section>
+    </main>
+
+    <footer>editing in progress — data autogenerated for demo purposes.</footer>
+  </div>
+
+<script>
+/*
+  Enhanced demo:
+  - Nationwide Dashboard
+  - Region summary cards
+  - Per-school counts (male/female)
+  - Statistics view (table)
+  - Tabs: Regions / Statistics
+*/
+
+// Gambian-like sample names (rotate)
+const maleNames = [
+  'Lamin Ceesay','Ebrima Jallow','Papa Bojang','Ousman Touray','Alieu Sanyang','Sainey Gomez',
+  'Kebba Jatta','Musa Ceesay','Samba Faal','Pa Lamin Jammeh','Momodou Cham','Ebrima Colley'
+];
+const femaleNames = [
+  'Fatou Ceesay','Aminata Bah','Isatou Jallow','Aja Kinteh','Binta Sanneh','Saffie Lowe',
+  'Hawa Darboe','Mariama Sanyang','Salma Jallow','Kaddy Cham','Adama Sonko','Awa Jarju'
+];
+
+// Regions and districts (from prior dataset)
+const regions = [
+  { name: 'Banjul', districts: ['Banjul Ward A','Banjul Ward B'] },
+  { name: 'Kanifing Municipality', districts: ['Serekunda East','Serekunda West','Brikama Road','Tallinding Kunjang','Latrikunda Sabiji'] },
+  { name: 'West Coast Region (Brikama)', districts: ['Kombo North','Kombo South','Kombo Central','Kombo East','Kombo Central II','Foni Bintang-Karenai','Foni Brefet','Foni Jarrol','Foni Kansala'] },
+  { name: 'North Bank Region (Kerewan)', districts: ['Lower Niumi','Upper Niumi','Jokadu','Lower Baddibu','Central Baddibu','Upper Baddibu'] },
+  { name: 'Lower River Region (Mansa Konko)', districts: ['Kiang West','Kiang Central','Kiang East','Jarra West','Jarra Central','Jarra East'] },
+  { name: 'Central River Region (Janjanbureh)', districts: ['Janjanbureh','Niani','Nianija','Sami','Fulladu West','Niamina East','Niamina West','Niamina Dankunku','Lower Saloum','Upper Saloum'] },
+  { name: 'Upper River Region (Basse)', districts: ['Fulladu East','Kantora','Sandu','Tumana','Wuli West','Wuli East','Jimara'] }
+];
+
+// id generator for dummy TIN and ID numbers
+let idCounter = 200000;
+function genID(prefix){
+  idCounter++;
+  return `${prefix}-${String(idCounter).padStart(6,'0')}`;
+}
+
+// build the full dataset (same scheme as original)
+const fullData = regions.map(region => {
+  return {
+    region: region.name,
+    districts: region.districts.map(districtName => {
+      // create school lists as required:
+      const primary = Array.from({length:5},(_,i)=>({ level:'Primary', name:`${districtName} Primary School #${i+1}` }));
+      const junior  = Array.from({length:4},(_,i)=>({ level:'Junior',  name:`${districtName} Junior School #${i+1}` }));
+      const senior  = Array.from({length:5},(_,i)=>({ level:'Senior',  name:`${districtName} Senior School #${i+1}` }));
+      const schools = [...primary, ...junior, ...senior];
+
+      // assign teachers to each school
+      const schoolsWithTeachers = schools.map((school, sIndex) => {
+        const teachers = Array.from({length:6}, (_, tIndex) => {
+          const gender = tIndex < 3 ? 'Male' : 'Female';
+          const name = gender === 'Male'
+            ? maleNames[(sIndex + tIndex) % maleNames.length]
+            : femaleNames[(sIndex + tIndex) % femaleNames.length];
+
+          const initials = name.split(' ').map(n => n[0]).slice(0,2).join('');
+          const photo = `https://via.placeholder.com/120/ffffff/08101a?text=${encodeURIComponent(initials)}`;
+
+          return {
+            name,
+            initials,
+            gender,
+            tin: genID('TIN'),
+            idNo: genID('GMBID'),
+            shift: (tIndex % 2 === 0) ? 'Morning' : 'Afternoon',
+            experience: 2 + ((sIndex + tIndex) % 10),
+            photo
+          };
+        });
+
+        return {
+          ...school,
+          teachers
+        };
+      });
+
+      return {
+        district: districtName,
+        schools: schoolsWithTeachers
+      };
+    })
+  };
+});
+
+// UI references
+const regionListEl = document.getElementById('regionList');
+const contentArea = document.getElementById('contentArea');
+const searchInput = document.getElementById('searchInput');
+const regionFilter = document.getElementById('regionFilter');
+const districtFilter = document.getElementById('districtFilter');
+const schoolFilter = document.getElementById('schoolFilter');
+const clearBtn = document.getElementById('clearBtn');
+const tabRegions = document.getElementById('tabRegions');
+const tabStats = document.getElementById('tabStats');
+const viewStatsTop = document.getElementById('viewStatsTop');
+
+// helper: compute totals across dataset
+function computeTotals(dataset = fullData){
+  const totals = {
+    nationwide: { total:0, male:0, female:0, byLevel: { Primary:0, Junior:0, Senior:0 } },
+    regions: [] // { region, total, male, female, byLevel: { Primary, Junior, Senior } }
+  };
+
+  dataset.forEach(r => {
+    const rtot = { region: r.region, total:0, male:0, female:0, byLevel:{ Primary:0, Junior:0, Senior:0 } };
+
+    r.districts.forEach(d => {
+      d.schools.forEach(s => {
+        const sCount = s.teachers.length;
+        rtot.total += sCount;
+        totals.nationwide.total += sCount;
+        // per-level (count teachers by level)
+        if(rtot.byLevel[s.level] !== undefined){
+          rtot.byLevel[s.level] += sCount;
+          totals.nationwide.byLevel[s.level] += sCount;
+        }
+        // male / female count
+        s.teachers.forEach(t => {
+          if(t.gender === 'Male'){ rtot.male++; totals.nationwide.male++; }
+          else { rtot.female++; totals.nationwide.female++; }
+        });
+      });
+    });
+
+    totals.regions.push(rtot);
+  });
+
+  return totals;
+}
+
+// create dashboard DOM
+function renderDashboard(totals){
+  // top dashboard + right-hand region totals card
+  const dash = document.createElement('div');
+  dash.className = 'dashboard';
+
+  // main left dashboard card
+  const left = document.createElement('div');
+  left.className = 'dash-card';
+  left.innerHTML = `
+    <h2 style="color:var(--gold);margin:0 0 .4rem 0">Nationwide Summary</h2>
+    <div class="small-muted">Auto-calculated totals from dataset</div>
+    <div style="margin-top:.8rem" id="nationSummaryInner"></div>
+  `;
+
+  // right column: mini region totals
+  const right = document.createElement('div');
+  right.className = 'dash-card';
+  right.innerHTML = `<h3 style="margin:0 0 .4rem 0;color:var(--gold)">Regions Overview</h3><div id="regionsOverviewInner" class="region-summary"></div>`;
+
+  dash.appendChild(left);
+  dash.appendChild(right);
+
+  contentArea.appendChild(dash);
+
+  // fill nationSummaryInner
+  const ns = document.getElementById('nationSummaryInner');
+  ns.innerHTML = `
+    <div class="stat-row">
+      <div class="stat">
+        <h3>${totals.nationwide.total.toLocaleString()}</h3>
+        <div class="small-muted">Total Teachers (Nationwide)</div>
+      </div>
+      <div class="stat">
+        <h3>${totals.nationwide.male.toLocaleString()}</h3>
+        <div class="small-muted">Male Teachers</div>
+      </div>
+      <div class="stat">
+        <h3>${totals.nationwide.female.toLocaleString()}</h3>
+        <div class="small-muted">Female Teachers</div>
+      </div>
+    </div>
+
+    <div style="margin-top:.8rem">
+      <strong class="small-muted">By School Level</strong>
+      <div style="display:flex;gap:.6rem;margin-top:.4rem;flex-wrap:wrap">
+        <div class="stat" style="min-width:120px">
+          <h3>${totals.nationwide.byLevel.Primary.toLocaleString()}</h3>
+          <div class="small-muted">Primary</div>
+        </div>
+        <div class="stat" style="min-width:120px">
+          <h3>${totals.nationwide.byLevel.Junior.toLocaleString()}</h3>
+          <div class="small-muted">Junior</div>
+        </div>
+        <div class="stat" style="min-width:120px">
+          <h3>${totals.nationwide.byLevel.Senior.toLocaleString()}</h3>
+          <div class="small-muted">Senior</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // fill regionsOverviewInner
+  const roi = document.getElementById('regionsOverviewInner');
+  roi.innerHTML = '';
+  totals.regions.forEach(r => {
+    const line = document.createElement('div');
+    line.className = 'region-line';
+    line.innerHTML = `<div style="font-weight:700">${r.region}</div><div class="small-muted">${r.total} teachers</div>`;
+    roi.appendChild(line);
+  });
+}
+
+// render entire Regions view (dashboard then region list)
+function renderRegionsView() {
+  contentArea.innerHTML = '';
+  const totals = computeTotals(fullData);
+  renderDashboard(totals);
+
+  // After dashboard, render each region with its summary and districts
+  fullData.forEach(r => {
+    // region header + summary
+    const regionBox = document.createElement('div');
+    regionBox.className = 'dash-card';
+    regionBox.style.marginTop = '0.8rem';
+    // compute region totals quickly
+    const rtot = computeTotals([r]).regions[0];
+    regionBox.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h2 style="margin:0;color:var(--gold)">${r.region}</h2>
+          <div class="small-muted">Total Teachers: <strong>${rtot.total}</strong> • Primary: ${rtot.byLevel.Primary} • Junior: ${rtot.byLevel.Junior} • Senior: ${rtot.byLevel.Senior}</div>
+        </div>
+        <div style="text-align:right">
+          <button class="btn" onclick="selectRegionByName('${r.region.replace(/'/g, "\\'")}')">View Region</button>
+        </div>
+      </div>
+    `;
+    contentArea.appendChild(regionBox);
+  });
+
+  // append a spacer
+  const spacer = document.createElement('div');
+  spacer.style.height = '10px';
+  contentArea.appendChild(spacer);
+}
+
+// render the detailed region page (districts -> schools -> teachers)
+function renderRegion(regionObj){
+  contentArea.innerHTML = '';
+  // dashboard for single region at top
+  const rtot = computeTotals([regionObj]).regions[0];
+  const top = document.createElement('div');
+  top.className = 'dash-card';
+  top.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h2 style="margin:0;color:var(--gold)">${regionObj.region}</h2>
+        <div class="small-muted">Total Teachers: <strong>${rtot.total}</strong> • Primary: ${rtot.byLevel.Primary} • Junior: ${rtot.byLevel.Junior} • Senior: ${rtot.byLevel.Senior}</div>
+      </div>
+      <div style="text-align:right">
+        <button class="btn" id="backToHome">Back</button>
+      </div>
+    </div>
+  `;
+  contentArea.appendChild(top);
+
+  // then districts and schools
+  regionObj.districts.forEach(d => {
+    const dEl = document.createElement('div');
+    dEl.className = 'district';
+    dEl.innerHTML = `<h3>📍 ${d.district}</h3>`;
+    const grid = document.createElement('div');
+    grid.className = 'schools-grid';
+
+    d.schools.forEach(s => {
+      // compute male/female for this school
+      const male = s.teachers.filter(t => t.gender === 'Male').length;
+      const female = s.teachers.filter(t => t.gender === 'Female').length;
+      const sEl = document.createElement('div');
+      sEl.className = 'school';
+      sEl.innerHTML = `<h4>${s.name} <small style="color:var(--muted)">(${s.level})</small></h4>
+        <div class="small-muted" style="margin-bottom:.6rem">Total Teachers: <strong>${s.teachers.length}</strong> (${male} Male • ${female} Female)</div>
+      `;
+
+      const secRow = document.createElement('div');
+      secRow.className = 'section-row';
+      const section = document.createElement('div');
+      section.className = 'section';
+      section.innerHTML = `<small>Teachers</small>`;
+
+      s.teachers.forEach(t => {
+        const tEl = document.createElement('div');
+        tEl.className = 'teacher';
+        tEl.innerHTML = `
+          <div class="avatar-wrap"><img class="avatar" src="${t.photo}" alt="${t.initials}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'initials\\'>${t.initials}</div>'" /></div>
+          <div class="tinfo">
+            <b>${t.name}</b>
+            <div class="tmeta">${t.gender} • ${t.shift} shift • ${t.experience} yrs</div>
+            <div class="tmeta">TIN: ${t.tin} • ID: ${t.idNo}</div>
+          </div>
+        `;
+        section.appendChild(tEl);
+      });
+
+      secRow.appendChild(section);
+      sEl.appendChild(secRow);
+      grid.appendChild(sEl);
+    });
+
+    dEl.appendChild(grid);
+    contentArea.appendChild(dEl);
+  });
+
+  document.getElementById('backToHome').addEventListener('click', () => {
+    // switch back to main regions view
+    tabRegions.click();
+    renderRegionsView();
+  });
+}
+
+// Statistics tab content (detailed table)
+function renderStatisticsView(){
+  contentArea.innerHTML = '';
+  const totals = computeTotals(fullData);
+
+  const statsCard = document.createElement('div');
+  statsCard.className = 'dash-card';
+  statsCard.innerHTML = `
+    <h2 style="color:var(--gold);margin:0 0 .4rem 0">Statistics Report</h2>
+    <div class="small-muted">Detailed region / level breakdown</div>
+    <div id="statsTableWrap"></div>
+  `;
+  contentArea.appendChild(statsCard);
+
+  const wrap = document.getElementById('statsTableWrap');
+  // create table
+  let html = `
+    <table class="stats-table">
+      <thead>
+        <tr><th>Region</th><th>Primary</th><th>Junior</th><th>Senior</th><th>Total</th><th>Male</th><th>Female</th></tr>
+      </thead>
+      <tbody>
+  `;
+  totals.regions.forEach(r => {
+    html += `<tr>
+      <td style="width:40%">${r.region}</td>
+      <td>${r.byLevel.Primary}</td>
+      <td>${r.byLevel.Junior}</td>
+      <td>${r.byLevel.Senior}</td>
+      <td>${r.total}</td>
+      <td>${r.male}</td>
+      <td>${r.female}</td>
+    </tr>`;
+  });
+
+  html += `</tbody>
+    <tfoot>
+      <tr style="font-weight:700">
+        <td>Total (Nationwide)</td>
+        <td>${totals.nationwide.byLevel.Primary}</td>
+        <td>${totals.nationwide.byLevel.Junior}</td>
+        <td>${totals.nationwide.byLevel.Senior}</td>
+        <td>${totals.nationwide.total}</td>
+        <td>${totals.nationwide.male}</td>
+        <td>${totals.nationwide.female}</td>
+      </tr>
+    </tfoot>
+    </table>
+    `;
+
+  wrap.innerHTML = html;
+
+  // Also add a CSV export button
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'btn';
+  exportBtn.style.marginTop = '10px';
+  exportBtn.textContent = 'Export CSV';
+  wrap.appendChild(exportBtn);
+
+  exportBtn.addEventListener('click', () => {
+    // build CSV
+    let csv = 'Region,Primary,Junior,Senior,Total,Male,Female\n';
+    totals.regions.forEach(r => {
+      csv += `"${r.region}",${r.byLevel.Primary},${r.byLevel.Junior},${r.byLevel.Senior},${r.total},${r.male},${r.female}\n`;
+    });
+    csv += `Nationwide,${totals.nationwide.byLevel.Primary},${totals.nationwide.byLevel.Junior},${totals.nationwide.byLevel.Senior},${totals.nationwide.total},${totals.nationwide.male},${totals.nationwide.female}\n`;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'gambia_teacher_statistics.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+}
+
+// populate sidebar and region dropdown
+fullData.forEach((r, regionIndex) => {
+  // sidebar item
+  const li = document.createElement('li');
+  li.className = 'region-item';
+  li.innerHTML = `<span>${r.region}</span><small style="color:var(--muted)">View</small>`;
+  li.addEventListener('click', () => {
+    // highlight and show that region
+    [...regionListEl.children].forEach((c,i) => c.classList.toggle('active', i===regionIndex));
+    // render the region details
+    renderRegion(r);
+  });
+  regionListEl.appendChild(li);
+
+  // dropdown option
+  const opt = document.createElement('option');
+  opt.value = r.region;
+  opt.textContent = r.region;
+  regionFilter.appendChild(opt);
+});
+
+// helper to populate district dropdown
+function populateDistricts(regionObj){
+  districtFilter.innerHTML = '<option value="">All Districts</option>';
+  schoolFilter.innerHTML = '<option value="">All Schools</option>';
+  regionObj.districts.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.district;
+    opt.textContent = d.district;
+    districtFilter.appendChild(opt);
+  });
+}
+
+// helper to populate schools dropdown
+function populateSchoolsFrom(regionName, districtName){
+  schoolFilter.innerHTML = '<option value="">All Schools</option>';
+  const region = fullData.find(r => r.region === regionName);
+  if(!region) return;
+  const district = region.districts.find(d => d.district === districtName);
+  if(!district) return;
+  district.schools.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.name;
+    opt.textContent = s.name;
+    schoolFilter.appendChild(opt);
+  });
+}
+
+// select first region by default (when Regions tab active)
+function selectRegion(idx){
+  [...regionListEl.children].forEach((c,i) => c.classList.toggle('active', i===idx));
+  const regionObj = fullData[idx];
+  renderRegion(regionObj);
+  populateDistricts(regionObj);
+  districtFilter.value = '';
+  schoolFilter.value = '';
+}
+function selectRegionByName(name){
+  const idx = fullData.findIndex(r => r.region === name);
+  if(idx >= 0) selectRegion(idx);
+}
+
+// filter logic (search & dropdowns) for the main list (when Regions tab is active)
+function filterAndRender(){
+  const q = (searchInput.value || '').trim().toLowerCase();
+  const regionVal = regionFilter.value;
+  const districtVal = districtFilter.value;
+  const schoolVal = schoolFilter.value;
+
+  // Build filtered subset
+  const filtered = fullData
+    .filter(r => !regionVal || r.region === regionVal)
+    .map(r => {
+      const districts = r.districts
+        .filter(d => !districtVal || d.district === districtVal)
+        .map(d => {
+          const schools = d.schools
+            .filter(s => !schoolVal || s.name === schoolVal)
+            .map(s => {
+              const teachers = s.teachers.filter(t =>
+                !q ||
+                t.name.toLowerCase().includes(q) ||
+                s.name.toLowerCase().includes(q) ||
+                d.district.toLowerCase().includes(q) ||
+                r.region.toLowerCase().includes(q)
+              );
+              return {...s, teachers};
+            })
+            .filter(s => s.teachers.length > 0);
+          return {...d, schools};
+        })
+        .filter(d => d.schools.length > 0);
+      return {...r, districts};
+    })
+    .filter(r => r.districts.length > 0);
+
+  // Render filtered
+  contentArea.innerHTML = '';
+  if(filtered.length === 0){
+    contentArea.innerHTML = `<div style="color:var(--muted)">No results found.</div>`;
+    return;
+  }
+
+  // Show dashboard computed from filtered set
+  const totals = computeTotals(filtered);
+  renderDashboard(totals);
+
+  filtered.forEach(r => {
+    const regionTitle = document.createElement('h2');
+    regionTitle.style.color = 'var(--gold)';
+    regionTitle.style.marginTop = '0';
+    regionTitle.textContent = r.region;
+    contentArea.appendChild(regionTitle);
+
+    r.districts.forEach(d => {
+      const dEl = document.createElement('div');
+      dEl.className = 'district';
+      dEl.innerHTML = `<h3>📍 ${d.district}</h3>`;
+      const grid = document.createElement('div');
+      grid.className = 'schools-grid';
+
+      d.schools.forEach(s => {
+        const male = s.teachers.filter(t => t.gender === 'Male').length;
+        const female = s.teachers.filter(t => t.gender === 'Female').length;
+        const sEl = document.createElement('div');
+        sEl.className = 'school';
+        sEl.innerHTML = `<h4>${s.name} <small style="color:var(--muted)">(${s.level})</small></h4>
+          <div class="small-muted" style="margin-bottom:.6rem">Total Teachers: <strong>${s.teachers.length}</strong> (${male} M • ${female} F)</div>
+        `;
+        const secRow = document.createElement('div');
+        secRow.className = 'section-row';
+        const section = document.createElement('div');
+        section.className = 'section';
+        section.innerHTML = `<small>Teachers</small>`;
+
+        s.teachers.forEach(t => {
+          const tEl = document.createElement('div');
+          tEl.className = 'teacher';
+          tEl.innerHTML = `
+            <div class="avatar-wrap"><img class="avatar" src="${t.photo}" alt="${t.initials}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'initials\\'>${t.initials}</div>'" /></div>
+            <div class="tinfo">
+              <b>${t.name}</b>
+              <div class="tmeta">${t.gender} • ${t.shift} shift • ${t.experience} yrs</div>
+              <div class="tmeta">TIN: ${t.tin} • ID: ${t.idNo}</div>
+            </div>
+          `;
+          section.appendChild(tEl);
+        });
+
+        secRow.appendChild(section);
+        sEl.appendChild(secRow);
+        grid.appendChild(sEl);
+      });
+
+      dEl.appendChild(grid);
+      contentArea.appendChild(dEl);
+    });
+  });
+}
+
+// populate district dropdown when region changes
+regionFilter.addEventListener('change', () => {
+  const val = regionFilter.value;
+  districtFilter.innerHTML = '<option value="">All Districts</option>';
+  schoolFilter.innerHTML = '<option value="">All Schools</option>';
+  if(!val){
+    filterAndRender(); return;
+  }
+  const regionObj = fullData.find(r => r.region === val);
+  if(regionObj){
+    regionObj.districts.forEach(d => {
+      const o = document.createElement('option');
+      o.value = d.district;
+      o.textContent = d.district;
+      districtFilter.appendChild(o);
+    });
+  }
+  filterAndRender();
+});
+
+// when district changes, populate schools
+districtFilter.addEventListener('change', () => {
+  const regionVal = regionFilter.value;
+  const districtVal = districtFilter.value;
+  schoolFilter.innerHTML = '<option value="">All Schools</option>';
+  if(regionVal && districtVal){
+    const regionObj = fullData.find(r => r.region === regionVal);
+    if(regionObj){
+      const districtObj = regionObj.districts.find(d => d.district === districtVal);
+      if(districtObj){
+        districtObj.schools.forEach(s => {
+          const o = document.createElement('option');
+          o.value = s.name;
+          o.textContent = s.name;
+          schoolFilter.appendChild(o);
+        });
+      }
+    }
+  }
+  filterAndRender();
+});
+
+schoolFilter.addEventListener('change', filterAndRender);
+searchInput.addEventListener('input', () => {
+  clearTimeout(window._searchTimer);
+  window._searchTimer = setTimeout(filterAndRender, 180);
+});
+
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  regionFilter.value = '';
+  districtFilter.innerHTML = '<option value="">All Districts</option>';
+  schoolFilter.innerHTML = '<option value="">All Schools</option>';
+  [...regionListEl.children].forEach(c => c.classList.remove('active'));
+  tabRegions.click();
+  renderRegionsView();
+});
+
+// Tabs behavior
+tabRegions.addEventListener('click', () => {
+  tabRegions.classList.add('active');
+  tabStats.classList.remove('active');
+  renderRegionsView();
+});
+
+tabStats.addEventListener('click', () => {
+  tabRegions.classList.remove('active');
+  tabStats.classList.add('active');
+  renderStatisticsView();
+});
+
+// viewStatsTop scrolls to statistics (switch tab)
+viewStatsTop.addEventListener('click', () => {
+  tabStats.click();
+  // scroll to top of content
+  contentArea.scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+// initial load: show Regions view
+renderRegionsView();
+filterAndRender();
+
+</script>
+</body>
+</html>
